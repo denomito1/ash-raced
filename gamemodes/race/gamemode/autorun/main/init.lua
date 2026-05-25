@@ -75,7 +75,7 @@ do
     local function replaceSpawn()
         ash_player.cleanSpawnPoints()
 
-        timer.Simple( 1, function()
+        timer.Simple( 0, function()
             if spawns then
                 for _, v in ipairs( ash_entity.getByClass( "info_player_start", false ) ) do
                     v:Remove()
