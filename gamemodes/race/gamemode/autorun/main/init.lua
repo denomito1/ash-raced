@@ -75,72 +75,74 @@ do
     local function replaceSpawn()
         ash_player.cleanSpawnPoints()
 
-        if spawns then
-            for _, v in ipairs( ash_entity.getByClass( "info_player_start", false ) ) do
-                v:Remove()
-            end
-
-            for i = 1, #spawns do
-                local data = spawns[ i ]
-
-                local ent = ents.Create( "info_player_start" )
-                ent:SetPos( data[ 1 ] )
-                ent:SetAngles( data[ 2 ] )
-                ent:Spawn()
-
-                ash_player.addSpawnPoint( ent, data[ 1 ], data[ 2 ] )
-            end
-        end
-
-        if spawn_trigger_finish then
-            for i = 1, #spawn_trigger_finish do
-                local data = spawn_trigger_finish[ i ]
-
-                local ent = ents.Create( "race_trigger_finish" )
-                ---@cast ent race.trigger_finish
-                ent:SetPos( data[ 1 ] )
-                ent.Mins = ent:WorldToLocal( data[ 1 ] )
-                ent.Maxs = ent:WorldToLocal( data[ 2 ] )
-                ent:Spawn()
-                ent.Dir = data[ 3 ]
-                ent.DirReverse = data[ 3 ] * -1
-
-                printf( "trigger spawn %s", ent )
-            end
-        end
-
-        if spawn_trigger_kill then
-            for i = 1, #spawn_trigger_kill do
-                local data = spawn_trigger_kill[ i ]
-
-                local ent = ents.Create( "race_trigger_kill" )
-                ---@cast ent race.trigger_kill
-                ent:SetPos( data[ 1 ] )
-                ent.Mins = ent:WorldToLocal( data[ 1 ] )
-                ent.Maxs = ent:WorldToLocal( data[ 2 ] )
-                ent:Spawn()
-
-                printf( "trigger kill %s", ent )
-            end
-        end
-
-        if spawn_ash_camera then
-            for i = 1, #spawn_ash_camera do
-                local data = spawn_ash_camera[ i ]
-
-                local ent = ents.Create( "ash_camera" )
-                ---@cast ent ash.camera
-                ent:SetPos( data[ 1 ] )
-                ent:SetAngles( data[ 2 ] )
-                ent:Spawn()
-
-                if i == 1 then
-                    SetGlobal2Entity( "race.cam", ent )
+        timer.Simple( 1, function()
+            if spawns then
+                for _, v in ipairs( ash_entity.getByClass( "info_player_start", false ) ) do
+                    v:Remove()
                 end
 
-                printf( "ash camera %s", ent )
+                for i = 1, #spawns do
+                    local data = spawns[ i ]
+
+                    local ent = ents.Create( "info_player_start" )
+                    ent:SetPos( data[ 1 ] )
+                    ent:SetAngles( data[ 2 ] )
+                    ent:Spawn()
+
+                    ash_player.addSpawnPoint( ent, data[ 1 ], data[ 2 ] )
+                end
             end
-        end
+
+            if spawn_trigger_finish then
+                for i = 1, #spawn_trigger_finish do
+                    local data = spawn_trigger_finish[ i ]
+
+                    local ent = ents.Create( "race_trigger_finish" )
+                    ---@cast ent race.trigger_finish
+                    ent:SetPos( data[ 1 ] )
+                    ent.Mins = ent:WorldToLocal( data[ 1 ] )
+                    ent.Maxs = ent:WorldToLocal( data[ 2 ] )
+                    ent:Spawn()
+                    ent.Dir = data[ 3 ]
+                    ent.DirReverse = data[ 3 ] * -1
+
+                    printf( "trigger spawn %s", ent )
+                end
+            end
+
+            if spawn_trigger_kill then
+                for i = 1, #spawn_trigger_kill do
+                    local data = spawn_trigger_kill[ i ]
+
+                    local ent = ents.Create( "race_trigger_kill" )
+                    ---@cast ent race.trigger_kill
+                    ent:SetPos( data[ 1 ] )
+                    ent.Mins = ent:WorldToLocal( data[ 1 ] )
+                    ent.Maxs = ent:WorldToLocal( data[ 2 ] )
+                    ent:Spawn()
+
+                    printf( "trigger kill %s", ent )
+                end
+            end
+
+            if spawn_ash_camera then
+                for i = 1, #spawn_ash_camera do
+                    local data = spawn_ash_camera[ i ]
+
+                    local ent = ents.Create( "ash_camera" )
+                    ---@cast ent ash.camera
+                    ent:SetPos( data[ 1 ] )
+                    ent:SetAngles( data[ 2 ] )
+                    ent:Spawn()
+
+                    if i == 1 then
+                        SetGlobal2Entity( "race.cam", ent )
+                    end
+
+                    printf( "ash camera %s", ent )
+                end
+            end
+        end )
     end
 
     hook.Add( "ash.entity.PostSpawnEntities", "Defaults", replaceSpawn )
@@ -152,7 +154,7 @@ hook.Add( "ash.entity.PlayerCreated", "Defaults", function( pl )
     timer.Simple( 1, function()
         if IsValid( pl ) then
             if ash_player.getCount() >= 1 and round.getRoundType() == "" then
-                round.start( "prepare" )
+                round.start( "prepare", 60 )
             end
         end
     end )
@@ -191,7 +193,7 @@ hook.Add( "CanPlayerEnterVehicle", "Defaults", function( pl )
 end )
 
 hook.Add( "CanExitVehicle", "Defaults", function( _, pl )
-    return true
+    return false
 end )
 
 hook.Add( "race.PlayerSpawn", "Defaults", function( pl )
