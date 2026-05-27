@@ -74,9 +74,6 @@ local round = import( "ash.round" )
 local race_laps = GetConVar( "race_laps" )
 assert( race_laps ~= nil, "race_laps convar not found" )
 
----@type race.checkpoint
-local checkpoint = import( "checkpoint" )
-
 do
     local format_time = _G.string.ToMinutesSeconds
     hook.Add( "HUDPaint", "Defaults", function()
@@ -90,8 +87,9 @@ do
         h = draw.SimpleText( "Круги: " .. math.max( lp:GetNW2Int( "race.points", 0 ) - 1, 0 ) .. " / " .. race_laps:GetInt(), "race.laps", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
         add_y = add_y + h
 
-        draw.SimpleText( lp:GetNW2Int( "race.checkpointID", 1 ) .. " dist: " .. math.floor( math.sqrt( checkpoint.getNextDist( lp ) ) ), "race.laps", 5, ash_ui.ScreenCenterY, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+        -- draw.SimpleText( lp:GetNW2Int( "race.checkpointID", 1 ) .. " dist: " .. math.floor( math.sqrt( checkpoint.getNextDist( lp ) ) ), "race.laps", 5, ash_ui.ScreenCenterY, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
     end )
+
 end
 
 concommand.Add( "race_spawnpos", function( pl )
@@ -228,12 +226,6 @@ do
                 end
             end
 
-            local nearest_point = checkpoint.
-
-            if path and nearest_point then
-                render.DrawLine( nearest_point, nearest_point + Vector( 0, 0, 100 ), color_sph, true )
-            end
-
             if path_start then
                 if last_point:Distance( pos ) >= 1024 and pos ~= last_point then
                     last_point = pos
@@ -260,14 +252,14 @@ do
             )
         end
 
-        for _, v in ipairs( checkpoint.getList() ) do
-            local mins = v[ 1 ]
-            local maxs = v[ 2 ]
-            local lpos = v[ 3 ]
-            local half = v[ 4 ]
+        -- for _, v in ipairs( checkpoint.getList() ) do
+        --     local mins = v[ 1 ]
+        --     local maxs = v[ 2 ]
+        --     local lpos = v[ 3 ]
+        --     local half = v[ 4 ]
 
-            render.DrawWireframeBox( lpos, box_angles, -half, half, color_white, true )
-        end
+        --     render.DrawWireframeBox( lpos, box_angles, -half, half, color_white, true )
+        -- end
 
         -- if checkpoints then
         --    	for i = 1, #checkpoints do
