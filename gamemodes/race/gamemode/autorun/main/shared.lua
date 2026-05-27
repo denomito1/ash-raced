@@ -7,6 +7,7 @@ local ash_player = import( "ash.player" )
 ---@type race.vehicle
 local vehicle = import( "vehicle" )
 
+CreateConVar( "race_laps", "1", { FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY }, "Number of laps to complete in the race", 1, 128 )
 
 do
     local ash_player_iterator = ash_player.iterator
@@ -50,7 +51,7 @@ do
                         end
 
                         pl:SetNW2Float( "race.startTime", CurTime() )
-                        vehicle.unfreeze( vehicle.get( pl ) )
+                        vehicle.unfreeze( pl )
                     end
                 end,
             },

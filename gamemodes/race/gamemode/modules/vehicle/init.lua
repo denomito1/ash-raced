@@ -51,9 +51,12 @@ end
 ---
 --- Freezes the vehicle's physics object.
 ---
----@param veh any
-function vehicle.freeze( veh )
-    if IsValid( veh ) then
+---@param pl Player
+function vehicle.freeze( pl )
+    pl:SetNW2Bool( "race.freeze", false )
+
+    local veh = vehicles[ pl ]
+    if veh ~= nil and veh:IsValid() then
         veh.isEngineEnabled = false
     end
 end
@@ -62,9 +65,12 @@ end
 ---
 --- Unfreezes the vehicle's physics object.
 ---
----@param veh any
-function vehicle.unfreeze( veh )
-    if IsValid( veh ) then
+---@param pl Player
+function vehicle.unfreeze( pl )
+    pl:SetNW2Bool( "race.freeze", true )
+
+    local veh = vehicles[ pl ]
+    if veh ~= nil and veh:IsValid() then
         veh.isEngineEnabled = true
     end
 end
@@ -109,10 +115,14 @@ function vehicle.create( pl )
 
         ash_player.enterVehicle( pl, veh )
 
+        if pl:GetNW2Bool( "race.freeze" ) then
+            vehicle.freeze( pl )
+        end
+
         return veh
     end
 
-    timer.Simple( 1, function()
+    timer.Simple( 0, function()
         if veh ~= nil and veh:IsValid() then
             veh:SetColor( color )
         end
@@ -177,6 +187,21 @@ hook.Add( "ash.player.PostSpawn", "race.player.PostSpawn", function( pl )
 
     hook.Run( "race.PlayerSpawn", pl, veh )
 end )
+
+do
+    local Entity_IsValid = Entity.IsValid
+    hook.Add( "ash.player.SetupPosition", "SpawnControl", function( pl )
+        local spawnpoint = ash_player.getSpawnPoint( pl, false )
+        if spawnpoint ~= nil then
+            local entity = spawnpoint.entity
+            if entity ~= nil and Entity_IsValid( entity ) then
+                return entity:WorldSpaceCenter(), entity:GetAngles()
+            end
+
+            return spawnpoint.origin, spawnpoint.angles
+        end
+    end )
+end
 
 hook.Add( "PlayerDisconnected", "race.player.Disconnected", function( pl )
     vehicle.remove( pl )

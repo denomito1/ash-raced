@@ -1,19 +1,96 @@
 include( "shared.lua" )
 
+---@type ash.ui
+local ash_ui = import( "ash.ui" )
+
+---@type ash.config
+local config = import( "ash.config" )
+
+---@type race.grid
+local grid = import( "race.grid" )
+
+---@type ash.player
+local ash_player = import( "ash.player" )
+
+ash_ui.font( "race.TimeLeft", {
+    font = "Roboto",
+    extended = true,
+    size = "4vmin",
+    weight = 900,
+    blursize = 0,
+    scanlines = 0,
+    antialias = true,
+    underline = false,
+    italic = false,
+    strikeout = false,
+    symbol = false,
+    rotary = false,
+    shadow = true,
+    additive = false,
+    outline = false,
+} )
+
+ash_ui.font( "race.roundType", {
+    font = "Roboto",
+    extended = true,
+    size = "2vmin",
+    weight = 900,
+    blursize = 0,
+    scanlines = 0,
+    antialias = true,
+    underline = false,
+    italic = false,
+    strikeout = false,
+    symbol = false,
+    rotary = false,
+    shadow = true,
+    additive = false,
+    outline = false,
+} )
+
+ash_ui.font( "race.laps", {
+    font = "Roboto",
+    extended = true,
+    size = "1.5vmin",
+    weight = 900,
+    blursize = 0,
+    scanlines = 0,
+    antialias = true,
+    underline = false,
+    italic = false,
+    strikeout = false,
+    symbol = false,
+    rotary = false,
+    shadow = true,
+    additive = false,
+    outline = false,
+} )
+
+
 ---@type ash.round
 local round = import( "ash.round" )
 
----@type ash.ui
-local ash_ui = import( "ash.ui" )
+
+local race_laps = GetConVar( "race_laps" )
+assert( race_laps ~= nil, "race_laps convar not found" )
+
+---@type race.checkpoint
+local checkpoint = import( "checkpoint" )
 
 do
     local format_time = _G.string.ToMinutesSeconds
     hook.Add( "HUDPaint", "Defaults", function()
         local lp = LocalPlayer()
 
-        draw.SimpleText( format_time( round.getTimeLeft() ), "DermaLarge", ScrW() * 0.5, 5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
-        draw.SimpleText( round.getRoundType():upper(), "DermaDefaultBold", ScrW() * 0.5, 35, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
-        draw.SimpleText( lp:GetNW2Int( "race.points", 0 ), "DermaDefaultBold", ScrW() * 0.5, 55, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+        local add_y = 5
+        local _, h = draw.SimpleText( format_time( round.getTimeLeft() ), "race.TimeLeft", ash_ui.ScreenCenterX, 5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+        add_y = add_y + h
+        h = draw.SimpleText( round.getRoundType():upper(), "race.roundType", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+        add_y = add_y + h
+        h = draw.SimpleText( "Круги: " .. math.max( lp:GetNW2Int( "race.points", 0 ) - 1, 0 ) .. " / " .. race_laps:GetInt(), "race.laps", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+        add_y = add_y + h
+
+        draw.SimpleText( lp:GetNW2Int( "race.checkpointID", 1 ) .. " dist: " .. math.floor( math.sqrt( checkpoint.getNextDist( lp ) ) ), "race.laps", 5, ash_ui.ScreenCenterY, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
     end )
 end
 
@@ -50,6 +127,14 @@ concommand.Add( "race_path", function()
     end
 end )
 
+concommand.Add( "race_pathjson", function()
+    for i = 1, list_points_path_count - 1 do
+        local pos = list_points_path[ i ]
+
+        print( string.format( "\t\"%s %s %s\",", math.floor( pos.x ), math.floor( pos.y ), math.floor( pos.z ) ) )
+    end
+end )
+
 concommand.Add( "race_dir", function( pl )
     local pos = pl:GetAimVector()
 
@@ -63,49 +148,166 @@ concommand.Add( "race_getpos", function( pl )
     print( string.format( "{ Vector( %s, %s, %s ), Angle( %s, %s, %s ) }", math.round( pos.x ), math.round( pos.y ), math.round( pos.z ), math.round( ang.p ), math.round( ang.y ), math.round( ang.r ) ) )
 end )
 
-hook.Add( "CalcView", "Defaults", function( data )
-    local winner = GetGlobal2Entity( "race.winner", NULL )
-    local cam = GetGlobal2Entity( "race.cam", NULL )
-    ---@cast winner Player
+local box_mins, box_maxs
+local box_angles = angle_zero
+concommand.Add( "race_box_mins", function()
+    local lp = LocalPlayer()
+    local pos = lp:GetPos()
 
+    box_mins = pos
+end )
 
-    if IsValid( winner ) and IsValid( cam ) then
-        return {
-            origin = cam:GetPos(),
-            angles = (winner:GetPos() - cam:GetPos()):Angle(),
-            fov = fov,
-            drawviewer = true
-        }
+concommand.Add( "race_box_maxs", function()
+    local lp = LocalPlayer()
+    local pos = lp:GetPos()
+
+    box_maxs = pos
+end )
+
+concommand.Add( "race_box_angles", function( _, _, _, str )
+    box_angles = Angle( str )
+end )
+
+concommand.Add( "race_getbox", function()
+    if box_mins and box_maxs then
+        local format_text = "{ Vector( %s, %s, %s ), Vector( %s, %s, %s ), Angle( %s, %s, %s ) },"
+        local str = (string.format( format_text, math.round( box_mins.x ), math.round( box_mins.y ), math.round( box_mins.z ), math.round( box_maxs.x ), math.round( box_maxs.y ), math.round( box_maxs.z ), math.round( box_angles.p ), math.round( box_angles.y ), math.round( box_angles.r ) ))
+        SetClipboardText( str )
+        print( str )
     end
 end )
 
-hook.Remove( "CalcView", "SimpleTP.Camera.View" )
+local path_start = false
+local last_point
+do
+    concommand.Add( "race_path_start", function( pl, _, args )
+        local pos = pl:WorldSpaceCenter()
 
-local simple_third_person = _G.Glide.simpleThirdPersonHook
+        last_point = pos
 
-hook.Add( "CalcView", "SimpleTP.Camera.View", function( ply, origin, ang, fov, znear, zfar )
-    local winner = GetGlobal2Entity( "race.winner", NULL )
-    local cam = GetGlobal2Entity( "race.cam", NULL )
-    ---@cast winner Player
+        table.clearKeys( list_points_path )
+        list_points_path_count = 1
+
+        list_points_path[ list_points_path_count ] = pos
+        path_start = true
+    end )
+
+    concommand.Add( "race_path_stop", function()
+        path_start = false
+        last_point = nil
+    end )
+end
+
+do
+    local color_sph = Color( 255, 255, 0 )
+    local developer = GetConVar( "developer" )
+    assert( developer ~= nil, "developer convar not found" )
 
 
-    if IsValid( winner ) and IsValid( cam ) then
-        return {
-            origin = cam:GetPos(),
-            angles = (winner:GetPos() - cam:GetPos()):Angle(),
-            fov = fov,
-            drawviewer = true
-        }
-    end
 
-    if simple_third_person ~= nil then
-        simple_third_person = _G.Glide.simpleThirdPersonHook
-    end
 
-    if simple_third_person then
-        return simple_third_person( ply, origin, ang, fov, znear, zfar )
-    end
-end )
+    hook.Add( "PostDrawOpaqueRenderables", "Defaults", function()
+        local lp = LocalPlayer()
+        local pos = lp:WorldSpaceCenter()
+        render.SetColorMaterial()
+
+
+        if developer:GetBool() then
+            for i = 1, list_points_path_count - 1 do
+                local pos2 = list_points_path[ i + 1 ]
+                local pos1 = list_points_path[ i ]
+
+                if pos:Distance( pos1 ) <= 2000 then
+                    render.DrawLine( pos1, pos2, color_white, true )
+                end
+            end
+
+            for i = 1, list_points_path_count do
+                if pos:Distance( list_points_path[ i ] ) <= 2000 then
+                    render.DrawSphere( list_points_path[ i ], 1, 128, 128, color_sph )
+                end
+            end
+
+            local nearest_point = checkpoint.
+
+            if path and nearest_point then
+                render.DrawLine( nearest_point, nearest_point + Vector( 0, 0, 100 ), color_sph, true )
+            end
+
+            if path_start then
+                if last_point:Distance( pos ) >= 1024 and pos ~= last_point then
+                    last_point = pos
+
+                    print( "add point", pos )
+
+                    list_points_path_count = list_points_path_count + 1
+                    list_points_path[ list_points_path_count ] = pos
+                end
+            end
+        end
+
+        if box_mins and box_maxs then
+            local lpos = (box_mins + box_maxs) * 0.5
+            local half = (box_maxs - box_mins) * 0.5
+
+            render.DrawWireframeBox(
+                lpos,       -- position
+                box_angles, -- angle
+                -half,      -- mins
+                half,       -- maxs
+                color_white,
+                true
+            )
+        end
+
+        for _, v in ipairs( checkpoint.getList() ) do
+            local mins = v[ 1 ]
+            local maxs = v[ 2 ]
+            local lpos = v[ 3 ]
+            local half = v[ 4 ]
+
+            render.DrawWireframeBox( lpos, box_angles, -half, half, color_white, true )
+        end
+
+        -- if checkpoints then
+        --    	for i = 1, #checkpoints do
+        --   		local data = checkpoints[ i ]
+        --   		render.DrawWireframeBox( Vector() , Angle(), data[ 1 ], data[ 2 ], color_white, true )
+        --    	end
+        -- end
+    end )
+end
+
+do
+    hook.Remove( "CalcView", "SimpleTP.Camera.View" )
+
+    local simple_third_person = _G.Glide.simpleThirdPersonHook
+
+    hook.Add( "CalcView", "SimpleTP.Camera.View", function( ply, origin, ang, fov, znear, zfar )
+        local winner = GetGlobal2Entity( "race.winner", NULL )
+        local cam = GetGlobal2Entity( "race.cam", NULL )
+        ---@cast winner Player
+
+
+        if IsValid( winner ) and IsValid( cam ) then
+            return {
+                origin = cam:GetPos(),
+                angles = (winner:GetPos() - cam:GetPos()):Angle(),
+                fov = fov,
+                drawviewer = true
+            }
+        end
+
+        if simple_third_person == nil then
+            simple_third_person = _G.Glide.simpleThirdPersonHook
+        end
+
+        if simple_third_person then
+            return simple_third_person( ply, origin, ang, fov, znear, zfar )
+        end
+    end )
+end
+
 
 do
     -- Garry's Mod Race Victory Menu

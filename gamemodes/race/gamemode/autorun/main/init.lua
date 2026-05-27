@@ -20,8 +20,15 @@ local vehicle = import( "vehicle" )
 ---@type ash.round
 local round = import( "ash.round" )
 
+---@type ash.config
+local config = import( "ash.config" )
+
 ---@type ash.entity
 import( "ash.entity" )
+
+local race_laps = GetConVar( "race_laps" )
+assert( race_laps ~= nil, "race_laps convar not found" )
+
 
 do
 
@@ -95,6 +102,20 @@ do
         },
     }
 
+    local path_str = "race/path/" .. game.GetMap()
+
+    config.setAllowReceive( path_str )
+    local path = config.get( path_str, false )
+
+    local checkpoints = {
+        [ "gm_tritype_racecity_v1" ] = {
+            { Vector( 15482, 3002, -142 ), Vector( 11765, 3333, 745 ), Angle( 0, 0, 0 ), path },
+        },
+    }
+
+    ---@type race.checkpoint
+    local checkpoint = import( "checkpoint" )
+
     local spawns = spawn_list[ game.GetMap() ]
     local spawn_trigger_finish = trigger_finish_list[ game.GetMap() ]
     local spawn_trigger_kill = trigger_kill[ game.GetMap() ]
@@ -155,6 +176,32 @@ do
                 end
             end
 
+            local list_checkpoints = checkpoint.getList()
+            local list_checkpoints_count = #list_checkpoints
+
+            for i = 1, list_checkpoints_count do
+                local v = list_checkpoints[ i ]
+                local ent = ents.Create( "race_trigger_checkpoint" )
+                ---@cast ent race.trigger_checkpoint
+                ent:SetPos( v[ 1 ] )
+                ent.Mins = ent:WorldToLocal( v[ 1 ] )
+                ent.Maxs = ent:WorldToLocal( v[ 2 ] )
+                -- ent:SetAngles( v[ 5 ] )
+                ent:Spawn()
+
+                ash.Logger:debug( "mins = %s, maxs = %s", v[ 1 ], v[ 2 ] )
+
+                ent.checkpointID = i
+
+                if i == list_checkpoints_count then
+                    ent.checkpointIDNext = 1
+                else
+                    ent.checkpointIDNext = i + 1
+                end
+
+                printf( "checkpoint %s", ent )
+            end
+
             if spawn_ash_camera then
                 for i = 1, #spawn_ash_camera do
                     local data = spawn_ash_camera[ i ]
@@ -172,6 +219,7 @@ do
                     printf( "ash camera %s", ent )
                 end
             end
+
         end )
     end
 
@@ -184,7 +232,7 @@ hook.Add( "ash.entity.PlayerCreated", "Defaults", function( pl )
     timer.Simple( 1, function()
         if IsValid( pl ) then
             if ash_player.getCount() >= 1 and round.getRoundType() == "" then
-                round.start( "prepare", 60 )
+                round.start( "prepare", GetConVar( "developer" ):GetBool() and 10 or 60 )
             end
         end
     end )
@@ -195,7 +243,7 @@ do
     assert( ash_round_time_post_round ~= nil, "ash_round_time_post_round not found" )
 
     hook.Add( "race.PlayerChangedPoints", "Defaults", function( pl, new_points )
-        if round.getRoundType() == "started" and not IsValid( GetGlobal2Entity( "race.winner", NULL ) ) and new_points >= 2 then
+        if round.getRoundType() == "started" and not IsValid( GetGlobal2Entity( "race.winner", NULL ) ) and new_points >= (race_laps:GetInt() + 1) then
             SetGlobal2Entity( "race.winner", pl )
 
             round.start( "post_round" )
@@ -232,7 +280,7 @@ end )
 
 hook.Add( "race.PlayerSpawn", "Defaults", function( pl )
     if round.getRoundType() == "prepare" then
-        vehicle.freeze( vehicle.get( pl ) )
+        vehicle.freeze( pl )
     end
 
     pl:SetNW2Float( "race.startTime", CurTime() )
