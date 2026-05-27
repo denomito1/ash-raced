@@ -1,4 +1,1 @@
-- Сломаны регдолы (не создаются)
-- Сломаны спавны (спавны создаются, но спавнит все равно на 0 0 0)
-- Нет дефолтного поведения для хуков (транспорт, выход, вход)
-- Вынести расчет размера модели в отдельный модуль
+https://github.com/denomito1/ash-raced.git https://github.com/Pika-Software/dreamwork.git https://github.com/Pika-Software/ash.git https://github.com/Pika-Software/glua-patches.gits

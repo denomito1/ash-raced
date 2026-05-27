@@ -57,7 +57,7 @@ do
 
             {
                 name = "post_round",
-                time = 10,
+                time = 8,
                 finish = function( data )
                     print( "round end", data.name )
                 end,

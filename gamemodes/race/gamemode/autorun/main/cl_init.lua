@@ -107,9 +107,6 @@ hook.Add( "CalcView", "SimpleTP.Camera.View", function( ply, origin, ang, fov, z
     end
 end )
 
-
-
-
 do
     -- Garry's Mod Race Victory Menu
     -- Красивое анимированное меню победы

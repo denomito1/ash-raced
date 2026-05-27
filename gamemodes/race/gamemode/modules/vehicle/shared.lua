@@ -1,3 +1,6 @@
+---@type ash.config
+local config = import( "ash.config" )
+
 ---@class race.vehicle
 local vehicle = {}
 
@@ -40,15 +43,15 @@ function vehicle.getDefault()
     return default_vehicle
 end
 
-do
+if SERVER then
+    config.setAllowReceive( "race/cars" )
 
-    local data = util.JSONToTable( file.Read( "data_static/race/vehicle.json", "GAME" ) or "[]" ) or {}
+    local data = config.get( "race/cars", false )
 
     for i = 1, #data do
         local v = data[ i ]
         vehicle.register( v.class_name, v )
     end
-
 end
 
 return vehicle

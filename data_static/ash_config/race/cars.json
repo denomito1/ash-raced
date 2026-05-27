@@ -1,0 +1,218 @@
+[
+    {
+        "class_name": "nfsuc_ast_db9_stk_06",
+        "category": "Sports Cars",
+        "icon_path": "entities/nfsuc_ast_db9_stk_06.png"
+    },
+    {
+        "class_name": "nfsuc_aud_r8_stk_08",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_aud_r8_stk_08.png"
+    },
+    {
+        "class_name": "nfsuc_aud_s5_stk_08",
+        "category": "Luxury Coupes",
+        "icon_path": "entities/nfsuc_aud_s5_stk_08.png"
+    },
+    {
+        "class_name": "nfsuc_aud_tt_stk_07",
+        "category": "Compact Sports",
+        "icon_path": "entities/nfsuc_aud_tt_stk_07.png"
+    },
+    {
+        "class_name": "nfsuc_bmw_m3_e46_03",
+        "category": "Sports Cars",
+        "icon_path": "entities/nfsuc_bmw_m3_e46_03.png"
+    },
+    {
+        "class_name": "nfsuc_bmw_m3_e92_08",
+        "category": "Sports Cars",
+        "icon_path": "entities/nfsuc_bmw_m3_e92_08.png"
+    },
+    {
+        "class_name": "nfsuc_bmw_m6_stk_08",
+        "category": "Luxury Cars",
+        "icon_path": "entities/nfsuc_bmw_m6_stk_08.png"
+    },
+    {
+        "class_name": "nfsuc_bug_vey_164_08",
+        "category": "Hypercars",
+        "icon_path": "entities/nfsuc_bug_vey_164_08.png"
+    },
+    {
+        "class_name": "nfsuc_che_cam_ss_67",
+        "category": "Muscle Cars",
+        "icon_path": "entities/nfsuc_che_cam_ss_67.png"
+    },
+    {
+        "class_name": "nfsuc_che_vet_sti_67",
+        "category": "Classic Cars",
+        "icon_path": "entities/nfsuc_che_vet_sti_67.png"
+    },
+    {
+        "class_name": "nfsuc_che_vet_z06_06",
+        "category": "Sports Cars",
+        "icon_path": "entities/nfsuc_che_vet_z06_06.png"
+    },
+    {
+        "class_name": "nfsuc_dod_cha_con_06",
+        "category": "Muscle Cars",
+        "icon_path": "entities/nfsuc_dod_cha_con_06.png"
+    },
+    {
+        "class_name": "nfsuc_dod_chr_stk_69",
+        "category": "Classic Cars",
+        "icon_path": "entities/nfsuc_dod_chr_stk_69.png"
+    },
+    {
+        "class_name": "nfsuc_dod_chr_bee_07",
+        "category": "Muscle Cars",
+        "icon_path": "entities/nfsuc_dod_chr_bee_07.png"
+    },
+    {
+        "class_name": "nfsuc_dod_vip_srt_08",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_dod_vip_srt_08.png"
+    },
+    {
+        "class_name": "nfsuc_for_gt_stk_06",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_for_gt_stk_06.png"
+    },
+    {
+        "class_name": "nfsuc_for_mus_gt_06",
+        "category": "Muscle Cars",
+        "icon_path": "entities/nfsuc_for_mus_gt_06.png"
+    },
+    {
+        "class_name": "nfsuc_koe_ccx_stk_06",
+        "category": "Hypercars",
+        "icon_path": "entities/nfsuc_koe_ccx_stk_06.png"
+    },
+    {
+        "class_name": "nfsuc_lam_gal_560_09",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_lam_gal_560_09.png"
+    },
+    {
+        "class_name": "nfsuc_lam_mur_lp_06",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_lam_mur_lp_06.png"
+    },
+    {
+        "class_name": "nfsuc_lex_is_f_08",
+        "category": "Sports Sedans",
+        "icon_path": "entities/nfsuc_lex_is_f_08.png"
+    },
+    {
+        "class_name": "nfsuc_lot_eli_111_06",
+        "category": "Track Cars",
+        "icon_path": "entities/nfsuc_lot_eli_111_06.png"
+    },
+    {
+        "class_name": "nfsuc_maz_rx7_stk_95",
+        "category": "JDM Legends",
+        "icon_path": "entities/nfsuc_maz_rx7_stk_95.png"
+    },
+    {
+        "class_name": "nfsuc_maz_rx8_stk_06",
+        "category": "JDM Legends",
+        "icon_path": "entities/nfsuc_maz_rx8_stk_06.png"
+    },
+    {
+        "class_name": "nfsuc_mcl_f1_stk_94",
+        "category": "Hypercars",
+        "icon_path": "entities/nfsuc_mcl_f1_stk_94.png"
+    },
+    {
+        "class_name": "nfsuc_mer_cls_55_08",
+        "category": "Luxury Cars",
+        "icon_path": "entities/nfsuc_mer_cls_55_08.png"
+    },
+    {
+        "class_name": "nfsuc_mer_slr_722_07",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_mer_slr_722_07.png"
+    },
+    {
+        "class_name": "nfsuc_mit_evo_ix_06",
+        "category": "Rally Icons",
+        "icon_path": "entities/nfsuc_mit_evo_ix_06.png"
+    },
+    {
+        "class_name": "nfsuc_nis_240_sx_89",
+        "category": "Drift Cars",
+        "icon_path": "entities/nfsuc_nis_240_sx_89.png"
+    },
+    {
+        "class_name": "nfsuc_nis_370_z_09",
+        "category": "Sports Cars",
+        "icon_path": "entities/nfsuc_nis_370_z_09.png"
+    },
+    {
+        "class_name": "nfsuc_nis_gtr_r35_08",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_nis_gtr_r35_08.png"
+    },
+    {
+        "class_name": "nfsuc_nis_sky_aer_99",
+        "category": "JDM Legends",
+        "icon_path": "entities/nfsuc_nis_sky_aer_99.png"
+    },
+    {
+        "class_name": "nfsuc_nis_sky_r34_99",
+        "category": "JDM Legends",
+        "icon_path": "entities/nfsuc_nis_sky_r34_99.png"
+    },
+    {
+        "class_name": "nfsuc_pag_zon_f_06",
+        "category": "Hypercars",
+        "icon_path": "entities/nfsuc_pag_zon_f_06.png"
+    },
+    {
+        "class_name": "nfsuc_ply_cud_stk_70",
+        "category": "Muscle Cars",
+        "icon_path": "entities/nfsuc_ply_cud_stk_70.png"
+    },
+    {
+        "class_name": "nfsuc_pon_gto_stk_65",
+        "category": "Classic Cars",
+        "icon_path": "entities/nfsuc_pon_gto_stk_65.png"
+    },
+    {
+        "class_name": "nfsuc_pon_sol_gxp_06",
+        "category": "Roadsters",
+        "icon_path": "entities/nfsuc_pon_sol_gxp_06.png"
+    },
+    {
+        "class_name": "nfsuc_por_911_gt2_08",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_por_911_gt2_08.png"
+    },
+    {
+        "class_name": "nfsuc_por_911_tur_06",
+        "category": "Sports Cars",
+        "icon_path": "entities/nfsuc_por_911_tur_06.png"
+    },
+    {
+        "class_name": "nfsuc_por_car_gt_05",
+        "category": "Supercars",
+        "icon_path": "entities/nfsuc_por_car_gt_05.png"
+    },
+    {
+        "class_name": "nfsuc_for_shl_gt_08",
+        "category": "Muscle Cars",
+        "icon_path": "entities/nfsuc_for_shl_gt_08.png"
+    },
+    {
+        "class_name": "nfsuc_toy_sup_stk_98",
+        "category": "JDM Legends",
+        "icon_path": "entities/nfsuc_toy_sup_stk_98.png"
+    },
+    {
+        "class_name": "nfsuc_vol_sci_stk_08",
+        "category": "Hot Hatch",
+        "icon_path": "entities/nfsuc_vol_sci_stk_08.png",
+        "default": true
+    }
+]

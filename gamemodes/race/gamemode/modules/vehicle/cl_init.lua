@@ -4,178 +4,15 @@ local vehicle = include( "shared.lua" )
 ---@type ash.ui
 local ash_ui = import( "ash.ui" )
 
+---@type ash.config
+local config = import( "ash.config" )
+
 CreateClientConVar( "race_vehicle_class", "vapid_stanier_retro", true, true )
 CreateClientConVar( "race_car_color", "255 255 255 255", true, true )
 
 local function MaterialToHTML( path )
     return "asset://garrysmod/materials/" .. path
 end
-
-local list_cars = {
-
-    -- Sedans
-    {
-        class_name = "albany_emperor",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/albany_emperor.png" )
-    },
-
-    {
-        class_name = "albany_emperor_rusty",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/albany_emperor_rusty.png" )
-    },
-
-    {
-        class_name = "declasse_merit",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/declasse_merit.png" )
-    },
-
-    {
-        class_name = "vapid_stanier",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_stanier.png" )
-    },
-
-    {
-        class_name = "vapid_stanier_ii",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_stanier_ii.png" )
-    },
-
-    {
-        class_name = "vapid_stanier_retro",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_stanier_retro.png" )
-    },
-
-    {
-        class_name = "vapid_schyster",
-        category = "Sedans",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_schyster.png" )
-    },
-
-    -- Muscle
-    {
-        class_name = "buffalo",
-        category = "Muscle",
-        icon_path = MaterialToHTML( "gui/glide/lcp/buffalo.png" )
-    },
-
-    {
-        class_name = "declasse_impaler_lx",
-        category = "Muscle",
-        icon_path = MaterialToHTML( "gui/glide/lcp/declasse_impaler_lx.png" )
-    },
-
-    {
-        class_name = "declasse_impaler_sz",
-        category = "Muscle",
-        icon_path = MaterialToHTML( "gui/glide/lcp/declasse_impaler_sz.png" )
-    },
-
-    -- SUVs / Utility
-    {
-        class_name = "declasse_alamo",
-        category = "SUV",
-        icon_path = MaterialToHTML( "gui/glide/lcp/declasse_alamo.png" )
-    },
-
-    {
-        class_name = "declasse_granger_retro",
-        category = "SUV",
-        icon_path = MaterialToHTML( "gui/glide/lcp/declasse_granger_retro.png" )
-    },
-
-    {
-        class_name = "patriot",
-        category = "SUV",
-        icon_path = MaterialToHTML( "gui/glide/lcp/patriot.png" )
-    },
-
-    {
-        class_name = "vapid_riata_classic",
-        category = "SUV",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_riata_classic.png" )
-    },
-
-    {
-        class_name = "vapid_scout",
-        category = "SUV",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_scout.png" )
-    },
-
-    -- Vans / Utility
-    {
-        class_name = "maibatsu_mule",
-        category = "Utility",
-        icon_path = MaterialToHTML( "gui/glide/lcp/maibatsu_mule.png" )
-    },
-
-    {
-        class_name = "vapid_speedo",
-        category = "Utility",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_speedo.png" )
-    },
-
-    {
-        class_name = "vapid_sandking_utility",
-        category = "Utility",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_sandking_utility.png" )
-    },
-
-    {
-        class_name = "vapid_interceptor",
-        category = "Utility",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_interceptor.png" )
-    },
-
-    -- Pickups
-    {
-        class_name = "declasse_yosemite_1500",
-        category = "Pickup",
-        icon_path = MaterialToHTML( "gui/glide/lcp/declasse_yosemite_1500.png" )
-    },
-
-    {
-        class_name = "vapid_1500_steed",
-        category = "Pickup",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_1500_steed.png" )
-    },
-
-    {
-        class_name = "vapid_bobcat",
-        category = "Pickup",
-        icon_path = MaterialToHTML( "gui/glide/lcp/vapid_bobcat.png" )
-    },
-
-    -- Compact / Classic
-    {
-        class_name = "albany_manana",
-        category = "Classic",
-        icon_path = MaterialToHTML( "gui/glide/lcp/albany_manana.png" )
-    },
-
-    {
-        class_name = "albany_manana_cabriolet",
-        category = "Classic",
-        icon_path = MaterialToHTML( "gui/glide/lcp/albany_manana_cabriolet.png" )
-    },
-
-    {
-        class_name = "benefactor_panto_citi",
-        category = "Compact",
-        icon_path = MaterialToHTML( "gui/glide/lcp/benefactor_panto_citi.png" )
-    },
-
-    -- Special
-    {
-        class_name = "romero_hearse",
-        category = "Special",
-        icon_path = MaterialToHTML( "gui/glide/lcp/romero_hearse.png" )
-    }
-}
 
 local PANEL_HTML = [[
 <!DOCTYPE html>
@@ -453,82 +290,98 @@ function addCar(name, className, iconPath, category)
 </html>
 ]]
 
-concommand.Add( "race_menu", function()
-
-    local old_panel = ash_ui.getPanel( "race.select_car" )
-    if IsValid( old_panel ) then
-        old_panel:SetVisible( true )
-        old_panel:MakePopup()
-        return
+config.receive( "race/cars", function( list_cars )
+    for _, car in ipairs( list_cars ) do
+        car.icon_path = MaterialToHTML( car.icon_path )
     end
 
-    local frame = ash_ui.setPanel( "race.select_car", "DFrame" )
-    ---@cast frame DFrame
-    frame:SetSize( 1000, 650 )
-    frame:Center()
-    frame:SetTitle( "" )
-    frame:ShowCloseButton( false )
-    frame:MakePopup()
-    frame:SetDeleteOnClose( false )
+    local function createPanel()
+        local frame = ash_ui.setPanel( "race.select_car", "DFrame" )
+        ---@cast frame DFrame
+        frame:SetSize( 1000, 650 )
+        frame:Center()
+        frame:SetTitle( "" )
+        frame:ShowCloseButton( false )
+        frame:MakePopup()
+        frame:SetDeleteOnClose( false )
 
-    frame.Paint = function( _, w, h )
-        draw.RoundedBox( 0, 0, 0, w, h, Color( 15, 15, 15 ) )
-    end
+        frame.Paint = function( _, w, h )
+            draw.RoundedBox( 0, 0, 0, w, h, Color( 15, 15, 15 ) )
+        end
 
-    local close = vgui.Create( "DButton", frame )
-    close:SetSize( 32, 32 )
-    close:SetPos( frame:GetWide() - 38, 6 )
-    close:SetText( "X" )
+        local close = vgui.Create( "DButton", frame )
+        close:SetSize( 32, 32 )
+        close:SetPos( frame:GetWide() - 38, 6 )
+        close:SetText( "X" )
 
-    close.DoClick = function()
-        frame:Close()
-    end
-
-    local html = vgui.Create( "DHTML", frame )
-    html:Dock( FILL )
-    html:DockMargin( 0, 40, 0, 0 )
-
-    html:SetHTML( PANEL_HTML )
-
-    html:AddFunction(
-        "gmod",
-        "selectVehicle",
-        function( className, r, g, b, a )
-
-            RunConsoleCommand( "race_vehicle_class", className )
-
-            RunConsoleCommand(
-                "race_car_color",
-                string.format( "%s %s %s %s", r, g, b, a )
-            )
-
+        close.DoClick = function()
             frame:Close()
         end
-    )
 
-    html.OnDocumentReady = function()
+        local html = vgui.Create( "DHTML", frame )
+        html:Dock( FILL )
+        html:DockMargin( 0, 40, 0, 0 )
 
-        for _, car in ipairs( list_cars ) do
+        html:SetHTML( PANEL_HTML )
 
-            local category = car.category or "Other"
+        html:AddFunction(
+            "gmod",
+            "selectVehicle",
+            function( className, r, g, b, a )
 
-            local vehicle_data = scripted_ents.GetStored( car.class_name )
+                RunConsoleCommand( "race_vehicle_class", className )
 
-            local display_name = car.class_name
+                RunConsoleCommand(
+                    "race_car_color",
+                    string.format( "%s %s %s %s", r, g, b, a )
+                )
 
-            if vehicle_data and vehicle_data.t then
-                display_name = vehicle_data.t.PrintName or car.class_name
+                frame:Close()
             end
+        )
 
-            local js = string.format(
-                "addCar(%q, %q, %q, %q)",
-                display_name,
-                car.class_name,
-                car.icon_path,
-                category
-            )
+        html.OnDocumentReady = function()
 
-            html:QueueJavascript( js )
+            for _, car in ipairs( list_cars ) do
+
+                local category = car.category or "Other"
+
+                local vehicle_data = scripted_ents.GetStored( car.class_name )
+
+                local display_name = car.class_name
+
+                if vehicle_data and vehicle_data.t then
+                    display_name = vehicle_data.t.PrintName or car.class_name
+                end
+
+                local js = string.format(
+                    "addCar(%q, %q, %q, %q)",
+                    display_name,
+                    car.class_name,
+                    car.icon_path,
+                    category
+                )
+
+                html:QueueJavascript( js )
+            end
         end
+
+        return frame
     end
+
+    timer.Simple( 1, function()
+        createPanel():SetVisible( false )
+    end )
+
+    concommand.Add( "race_menu", function()
+
+        local old_panel = ash_ui.getPanel( "race.select_car" )
+        if IsValid( old_panel ) then
+            old_panel:SetVisible( true )
+            old_panel:MakePopup()
+            return
+        end
+
+        createPanel()
+    end )
 end )

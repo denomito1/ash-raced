@@ -86,8 +86,6 @@ function vehicle.create( pl )
     r, g, b, a = tonumber( r ) or 255, tonumber( g ) or 255, tonumber( b ) or 255, tonumber( a ) or 255
     local color = Color( r, g, b, 255 )
 
-    print( color )
-
     local veh = ents.Create( veh_class )
 
     if veh ~= nil and veh:IsValid() then
@@ -113,6 +111,12 @@ function vehicle.create( pl )
 
         return veh
     end
+
+    timer.Simple( 1, function()
+        if veh ~= nil and veh:IsValid() then
+            veh:SetColor( color )
+        end
+    end )
 
     return nil
 end
@@ -176,6 +180,19 @@ end )
 
 hook.Add( "PlayerDisconnected", "race.player.Disconnected", function( pl )
     vehicle.remove( pl )
+end )
+
+hook.Add( "PlayerEnteredVehicle", "race.player.EnteredVehicle", function( pl, veh )
+    pl:SetSolid( SOLID_NONE )
+    pl:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
+    pl:PhysicsDestroy()
+
+    ash.Logger:debug( "set no solid", pl )
+end )
+
+hook.Add( "PlayerLeaveVehicle", "race.player.EnteredVehicle", function( pl, veh )
+    pl:SetSolid( SOLID_BBOX )
+    pl:SetCollisionGroup( COLLISION_GROUP_PLAYER )
 end )
 
 return vehicle

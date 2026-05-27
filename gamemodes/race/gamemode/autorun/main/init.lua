@@ -39,7 +39,28 @@ do
             { Vector( 13064, -771, 14 ), Angle( 0, 90, 0 ) },
             { Vector( 12805, -532, 14 ), Angle( 0, 90, 0 ) },
             { Vector( 12532, -303, 14 ), Angle( 0, 90, 0 ) },
-        }
+        },
+        [ "gm_futuropark_circuit_v1" ] = {
+            { Vector( -2358, -6724, 27 ), Angle( 0, -180, 0 ) },
+            { Vector( -2109, -6336, 27 ), Angle( 0, -180, 0 ) },
+            { Vector( -1777, -6723, 27 ), Angle( 0, -179, 0 ) },
+            { Vector( -1271, -6718, 27 ), Angle( 0, -179, 0 ) },
+            { Vector( -730, -6730, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( -225, -6725, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( 245, -6720, 27 ),   Angle( 0, -179, 0 ) },
+            { Vector( 804, -6714, 27 ),   Angle( 0, -179, 0 ) },
+            { Vector( 1327, -6718, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( 1850, -6677, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( 1580, -6352, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( 1101, -6357, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( 560, -6336, 27 ),   Angle( 0, -179, 0 ) },
+            { Vector( 37, -6341, 27 ),    Angle( 0, -179, 0 ) },
+            { Vector( -450, -6346, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( -947, -6351, 27 ),  Angle( 0, -179, 0 ) },
+            { Vector( -1461, -6356, 27 ), Angle( 0, -179, 0 ) },
+            { Vector( -1913, -6360, 27 ), Angle( 0, -179, 0 ) },
+
+        },
     }
 
     local trigger_finish_list = {
@@ -49,6 +70,13 @@ do
                 Vector( 11947, 3738, 647 ),
                 Vector( 0, 1, 0 ),
             },
+        },
+        [ "gm_futuropark_circuit_v1" ] = {
+            {
+                Vector( -2492, -7652, -141 ),
+                Vector( -2849, -5387, 116 ),
+                Vector( -1, 0, 0 ),
+            }
         }
     }
 
@@ -58,7 +86,7 @@ do
                 Vector( 15490, -15650, -2808 ),
                 Vector( -14953, 15215, -1631 ),
             },
-        }
+        },
     }
 
     local ash_cameras = {
@@ -90,6 +118,7 @@ do
                     ent:Spawn()
 
                     ash_player.addSpawnPoint( ent, data[ 1 ], data[ 2 ] )
+                    ash.Logger:debug( "info_player_start replaced for new %s", ent )
                 end
             end
 
@@ -106,7 +135,7 @@ do
                     ent.Dir = data[ 3 ]
                     ent.DirReverse = data[ 3 ] * -1
 
-                    printf( "trigger spawn %s", ent )
+                    ash.Logger:debug( "race_trigger_finish spawned %s", ent )
                 end
             end
 
@@ -121,7 +150,8 @@ do
                     ent.Maxs = ent:WorldToLocal( data[ 2 ] )
                     ent:Spawn()
 
-                    printf( "trigger kill %s", ent )
+                    ash.Logger:debug( "race_trigger_kill spawned %s", ent )
+
                 end
             end
 
@@ -164,13 +194,11 @@ do
     local ash_round_time_post_round = GetConVar( "ash_round_time_post_round" )
     assert( ash_round_time_post_round ~= nil, "ash_round_time_post_round not found" )
 
-    local string_tomins = _G.string.ToMinutesSeconds
-
     hook.Add( "race.PlayerChangedPoints", "Defaults", function( pl, new_points )
         if round.getRoundType() == "started" and not IsValid( GetGlobal2Entity( "race.winner", NULL ) ) and new_points >= 2 then
             SetGlobal2Entity( "race.winner", pl )
 
-            pl:ConCommand( string.format( "race_win %s %s", pl:Nick(), string_tomins( pl:GetNW2Float( "race.startTime", CurTime() ), CurTime() ) ) )
+            round.start( "post_round" )
 
             timer.Simple( ash_round_time_post_round:GetFloat() * 0.06, function()
                 game.SetTimeScale( 0.3 )
@@ -183,8 +211,14 @@ do
         end
     end )
 
-    hook.Add( "SetupPlayerVisibility", "Defaults", function( ply, ent )
+    hook.Add( "SetupPlayerVisibility", "Defaults", function( pl, ent )
+        local winner = GetGlobal2Entity( "race.winner", NULL )
+        local cam = GetGlobal2Entity( "race.cam", NULL )
+        ---@cast winner Player
 
+        if IsValid( winner ) and IsValid( cam ) and not pl:TestPVS( winner:GetPos() ) then
+            AddOriginToPVS( winner:GetPos() )
+        end
     end )
 end
 
@@ -193,7 +227,7 @@ hook.Add( "CanPlayerEnterVehicle", "Defaults", function( pl )
 end )
 
 hook.Add( "CanExitVehicle", "Defaults", function( _, pl )
-    return false
+    return true
 end )
 
 hook.Add( "race.PlayerSpawn", "Defaults", function( pl )
