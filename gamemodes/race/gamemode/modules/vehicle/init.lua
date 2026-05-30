@@ -1,3 +1,7 @@
+MODULE.Networks = {
+    "change"
+}
+
 ---@class race.vehicle
 local vehicle = include( "shared.lua" )
 
@@ -9,8 +13,6 @@ local ash_player = import( "ash.player" )
 
 ---@type ash.spectator
 local spectator = import( "ash.spectator" )
-
--- connect p2p:90286169766735873 -->
 
 ---@type ash.trace.Output
 local trace_result = {}
@@ -54,11 +56,6 @@ end
 ---@param pl Player
 function vehicle.freeze( pl )
     pl:SetNW2Bool( "race.freeze", false )
-
-    local veh = vehicles[ pl ]
-    if veh ~= nil and veh:IsValid() then
-        veh.isEngineEnabled = false
-    end
 end
 
 --- [SERVER]
@@ -68,23 +65,21 @@ end
 ---@param pl Player
 function vehicle.unfreeze( pl )
     pl:SetNW2Bool( "race.freeze", true )
-
-    local veh = vehicles[ pl ]
-    if veh ~= nil and veh:IsValid() then
-        veh.isEngineEnabled = true
-    end
 end
 
 ---@param pl Player
+---@param class string | nil
 ---@return Vehicle | nil
-function vehicle.create( pl )
+function vehicle.create( pl, class )
     vehicle.remove( pl )
 
-    local veh_class = vehicle.getDefault().class_name
+    local veh_class = class or vehicle.getDefault().class_name
 
     local client_car = pl:GetInfo( "race_vehicle_class" )
-    if vehicle.getByClass( client_car ) then
-        veh_class = client_car
+    if class == nil then
+        if vehicle.getByClass( client_car ) then
+            veh_class = client_car
+        end
     end
 
     local color_info = pl:GetInfo( "race_car_color" )
@@ -114,10 +109,6 @@ function vehicle.create( pl )
         veh:SetColor( color )
 
         ash_player.enterVehicle( pl, veh )
-
-        if pl:GetNW2Bool( "race.freeze" ) then
-            vehicle.freeze( pl )
-        end
 
         return veh
     end
@@ -183,8 +174,6 @@ hook.Add( "ash.player.PostSpawn", "race.player.PostSpawn", function( pl )
     veh:SetPos( map_angpos[ pl ][ 1 ] )
     veh:SetAngles( map_angpos[ pl ][ 2 ] or Angle() )
 
-    map_angpos[ pl ] = nil
-
     hook.Run( "race.PlayerSpawn", pl, veh )
 end )
 
@@ -208,16 +197,27 @@ hook.Add( "PlayerDisconnected", "race.player.Disconnected", function( pl )
 end )
 
 hook.Add( "PlayerEnteredVehicle", "race.player.EnteredVehicle", function( pl, veh )
-    pl:SetSolid( SOLID_NONE )
+    pl:SetMoveType( MOVETYPE_NOCLIP )
     pl:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
     pl:PhysicsDestroy()
-
-    ash.Logger:debug( "set no solid", pl )
 end )
 
 hook.Add( "PlayerLeaveVehicle", "race.player.EnteredVehicle", function( pl, veh )
-    pl:SetSolid( SOLID_BBOX )
+    pl:SetMoveType( MOVETYPE_WALK )
     pl:SetCollisionGroup( COLLISION_GROUP_PLAYER )
+end )
+
+hook.Add( "Glide_CanPlayerVehicleInput", "race.vehicle.CanPlayerVehicleInput", function( pl )
+    if not pl:GetNW2Bool( "race.freeze", false ) then
+        return false
+    end
+end )
+
+net.Receive( "change", function( _, pl )
+    local client_car = net.ReadString()
+    if vehicle.getByClass( client_car ) then
+        hook.Run( "race.PlayerChangeVehicle", pl, client_car )
+    end
 end )
 
 return vehicle

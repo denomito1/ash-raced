@@ -10,6 +10,12 @@ local config = import( "ash.config" )
 CreateClientConVar( "race_vehicle_class", "vapid_stanier_retro", true, true )
 CreateClientConVar( "race_car_color", "255 255 255 255", true, true )
 
+cvars.AddChangeCallback( "race_vehicle_class", function( _, value )
+    net.Start( "change" )
+    net.WriteString( value )
+    net.SendToServer()
+end, "update" )
+
 local function MaterialToHTML( path )
     return "asset://garrysmod/materials/" .. path
 end
