@@ -49,24 +49,6 @@ function vehicle.remove( pl )
     end
 end
 
---- [SERVER]
----
---- Freezes the vehicle's physics object.
----
----@param pl Player
-function vehicle.freeze( pl )
-    pl:SetNW2Bool( "race.freeze", false )
-end
-
---- [SERVER]
----
---- Unfreezes the vehicle's physics object.
----
----@param pl Player
-function vehicle.unfreeze( pl )
-    pl:SetNW2Bool( "race.freeze", true )
-end
-
 ---@param pl Player
 ---@param class string | nil
 ---@return Vehicle | nil
@@ -205,12 +187,6 @@ end )
 hook.Add( "PlayerLeaveVehicle", "race.player.EnteredVehicle", function( pl, veh )
     pl:SetMoveType( MOVETYPE_WALK )
     pl:SetCollisionGroup( COLLISION_GROUP_PLAYER )
-end )
-
-hook.Add( "Glide_CanPlayerVehicleInput", "race.vehicle.CanPlayerVehicleInput", function( pl )
-    if not pl:GetNW2Bool( "race.freeze", false ) then
-        return false
-    end
 end )
 
 net.Receive( "change", function( _, pl )

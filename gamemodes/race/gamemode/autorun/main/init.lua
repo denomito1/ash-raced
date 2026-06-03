@@ -279,11 +279,29 @@ hook.Add( "CanExitVehicle", "Defaults", function( _, pl )
 end )
 
 hook.Add( "race.PlayerSpawn", "Defaults", function( pl )
-    if round.getRoundType() == "prepare" then
-        vehicle.freeze( pl )
-    end
-
     pl:SetNW2Float( "race.startTime", CurTime() )
 
     pl:SetNW2Int( "race.points", 0 )
+end )
+
+hook.Add( "race.PlayerChangeVehicle", "Dir", function( pl, new_car )
+    if round.getRoundType() == "prepare" then
+        vehicle.remove( pl )
+        pl:KillSilent()
+        timer.Simple( 1, function()
+            if IsValid( pl ) and round.getRoundType() == "prepare" then
+                if not pl:Alive() then
+                    pl:Spawn()
+                end
+
+                vehicle.create( pl, new_car )
+            end
+        end )
+    end
+end )
+
+hook.Add( "Glide_CanPlayerVehicleInput", "Defaults", function( pl )
+    if round.getRoundType() == "prepare" then
+        return false
+    end
 end )

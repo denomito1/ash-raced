@@ -51,7 +51,6 @@ do
                         end
 
                         pl:SetNW2Float( "race.startTime", CurTime() )
-                        vehicle.unfreeze( pl )
                     end
                 end,
             },

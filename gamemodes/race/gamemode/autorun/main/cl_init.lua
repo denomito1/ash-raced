@@ -87,7 +87,7 @@ do
         h = draw.SimpleText( "Круги: " .. math.max( lp:GetNW2Int( "race.points", 0 ) - 1, 0 ) .. " / " .. race_laps:GetInt(), "race.laps", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
         add_y = add_y + h
 
-        -- draw.SimpleText( lp:GetNW2Int( "race.checkpointID", 1 ) .. " dist: " .. math.floor( math.sqrt( checkpoint.getNextDist( lp ) ) ), "race.laps", 5, ash_ui.ScreenCenterY, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+        draw.SimpleText( lp:GetNW2Int( "race.checkpointID", 1 ), "race.laps", 5, ash_ui.ScreenCenterY, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
     end )
 
 end
@@ -166,10 +166,12 @@ concommand.Add( "race_box_angles", function( _, _, _, str )
     box_angles = Angle( str )
 end )
 
+
 concommand.Add( "race_getbox", function()
+    local dir = LocalPlayer():GetAimVector()
     if box_mins and box_maxs then
-        local format_text = "{ Vector( %s, %s, %s ), Vector( %s, %s, %s ), Angle( %s, %s, %s ) },"
-        local str = (string.format( format_text, math.round( box_mins.x ), math.round( box_mins.y ), math.round( box_mins.z ), math.round( box_maxs.x ), math.round( box_maxs.y ), math.round( box_maxs.z ), math.round( box_angles.p ), math.round( box_angles.y ), math.round( box_angles.r ) ))
+        local format_text = "[ \"%s %s %s\", \"%s %s %s\", \"%s %s %s\", \"%s %s %s\" ],"
+        local str = string.format( format_text, math.round( box_mins.x ), math.round( box_mins.y ), math.round( box_mins.z ), math.round( box_maxs.x ), math.round( box_maxs.y ), math.round( box_maxs.z ), math.round( box_angles.p ), math.round( box_angles.y ), math.round( box_angles.r ), math.round( dir.x ), math.round( dir.y ), math.round( dir.z ) )
         SetClipboardText( str )
         print( str )
     end
