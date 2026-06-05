@@ -81,11 +81,11 @@ function vehicle.create( pl, class )
     r, g, b, a = tonumber( r ) or 255, tonumber( g ) or 255, tonumber( b ) or 255, tonumber( a ) or 255
     local color = Color( r, g, b, 255 )
 
-    local veh = ents.Create( veh_class )
-
     if race_randomcar:GetBool() then
         veh_class = random_veh_class
     end
+
+    local veh = ents.Create( veh_class )
 
     if veh ~= nil and veh:IsValid() then
         ---@cast veh Vehicle
