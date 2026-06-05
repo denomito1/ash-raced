@@ -2,6 +2,9 @@ MODULE.Networks = {
     "change"
 }
 
+---@type ash.config
+local config = import( "ash.config" )
+
 ---@class race.vehicle
 local vehicle = include( "shared.lua" )
 
@@ -49,6 +52,15 @@ function vehicle.remove( pl )
     end
 end
 
+local cars = config.get( "race/cars", false )
+local random_veh_class = cars[ math.random( #cars ) ].class_name
+
+hook.Add( "ash.round.start", "Defaults", function()
+    random_veh_class = cars[ math.random( #cars ) ].class_name
+end )
+
+local race_randomcar = CreateConVar( "race_randomcar", "0", { FCVAR_ARCHIVE, FCVAR_NOTIFY }, "Randomly selects a vehicle class for each player", 0, 1 )
+
 ---@param pl Player
 ---@param class string | nil
 ---@return Vehicle | nil
@@ -70,6 +82,10 @@ function vehicle.create( pl, class )
     local color = Color( r, g, b, 255 )
 
     local veh = ents.Create( veh_class )
+
+    if race_randomcar:GetBool() then
+        veh_class = random_veh_class
+    end
 
     if veh ~= nil and veh:IsValid() then
         ---@cast veh Vehicle
