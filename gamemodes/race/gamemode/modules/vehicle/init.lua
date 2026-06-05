@@ -134,7 +134,7 @@ hook.Add( "ash.player.SpawnPoint", "race.player.Spawn", function( pl, spawnpoint
         origin, angles = entity:GetPos(), entity:GetAngles()
     end
 
-    map_angpos[ pl ] = { origin + Vector( 0, 0, 100 ), angles }
+    map_angpos[ pl ] = { origin + Vector( 0, 0, 30 ), angles }
 
     trace.start = origin
     trace.endpos = origin

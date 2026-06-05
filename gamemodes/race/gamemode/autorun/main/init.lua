@@ -31,102 +31,27 @@ assert( race_laps ~= nil, "race_laps convar not found" )
 
 
 do
+    local map = game.GetMap()
 
-    local spawn_list = {
-        [ "gm_tritype_racecity_v1" ] = {
-            { Vector( 12546, 2879, 0 ),  Angle( 0, 90, 0 ) },
-            { Vector( 12788, 2660, 5 ),  Angle( 0, 90, 0 ) },
-            { Vector( 13062, 2321, 14 ), Angle( 0, 90, 0 ) },
-            { Vector( 13068, 1318, 14 ), Angle( 0, 90, 0 ) },
-            { Vector( 12798, 1486, 14 ), Angle( 0, 90, 0 ) },
-            { Vector( 12540, 1773, 14 ), Angle( 0, 90, 0 ) },
-            { Vector( 12547, 792, 14 ),  Angle( 0, 90, 0 ) },
-            { Vector( 12810, 532, 14 ),  Angle( 0, 90, 0 ) },
-            { Vector( 13063, 245, 14 ),  Angle( 0, 90, 0 ) },
-            { Vector( 13064, -771, 14 ), Angle( 0, 90, 0 ) },
-            { Vector( 12805, -532, 14 ), Angle( 0, 90, 0 ) },
-            { Vector( 12532, -303, 14 ), Angle( 0, 90, 0 ) },
-        },
-        [ "gm_futuropark_circuit_v1" ] = {
-            { Vector( -2358, -6724, 27 ), Angle( 0, -180, 0 ) },
-            { Vector( -2109, -6336, 27 ), Angle( 0, -180, 0 ) },
-            { Vector( -1777, -6723, 27 ), Angle( 0, -179, 0 ) },
-            { Vector( -1271, -6718, 27 ), Angle( 0, -179, 0 ) },
-            { Vector( -730, -6730, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( -225, -6725, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( 245, -6720, 27 ),   Angle( 0, -179, 0 ) },
-            { Vector( 804, -6714, 27 ),   Angle( 0, -179, 0 ) },
-            { Vector( 1327, -6718, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( 1850, -6677, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( 1580, -6352, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( 1101, -6357, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( 560, -6336, 27 ),   Angle( 0, -179, 0 ) },
-            { Vector( 37, -6341, 27 ),    Angle( 0, -179, 0 ) },
-            { Vector( -450, -6346, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( -947, -6351, 27 ),  Angle( 0, -179, 0 ) },
-            { Vector( -1461, -6356, 27 ), Angle( 0, -179, 0 ) },
-            { Vector( -1913, -6360, 27 ), Angle( 0, -179, 0 ) },
-
-        },
-    }
-
-    local trigger_finish_list = {
-        [ "gm_tritype_racecity_v1" ] = {
-            {
-                Vector( 13460, 4273, -280 ),
-                Vector( 11947, 3738, 647 ),
-                Vector( 0, 1, 0 ),
-            },
-        },
-        [ "gm_futuropark_circuit_v1" ] = {
-            {
-                Vector( -2492, -7652, -141 ),
-                Vector( -2849, -5387, 116 ),
-                Vector( -1, 0, 0 ),
-            }
-        }
-    }
-
-    local trigger_kill = {
-        [ "gm_tritype_racecity_v1" ] = {
-            {
-                Vector( 15490, -15650, -2808 ),
-                Vector( -14953, 15215, -1631 ),
-            },
-        },
-    }
-
-    local ash_cameras = {
-        [ "gm_tritype_racecity_v1" ] = {
-            { Vector( 14400, 4900, 780 ), Angle( 0, -152, 0 ) }
-        },
-    }
-
-    local path_str = "race/path/" .. game.GetMap()
+    local path_str = "race/path/" .. map
 
     config.setAllowReceive( path_str )
     local path = config.get( path_str, false )
 
-    local checkpoints = {
-        [ "gm_tritype_racecity_v1" ] = {
-            { Vector( 15482, 3002, -142 ), Vector( 11765, 3333, 745 ), Angle( 0, 0, 0 ), path },
-        },
-    }
-
     ---@type race.checkpoint
     local checkpoint = import( "checkpoint" )
 
-    local spawns = spawn_list[ game.GetMap() ]
-    local spawn_trigger_finish = trigger_finish_list[ game.GetMap() ]
-    local spawn_trigger_kill = trigger_kill[ game.GetMap() ]
-    local spawn_ash_camera = ash_cameras[ game.GetMap() ]
+    local spawns = config.get( "race/spawns/" .. map, false )
+    local spawn_trigger_finish = config.get( "race/finish/" .. map, false )
+    local spawn_trigger_kill = config.get( "race/kill/" .. map, false )
+    local spawn_ash_camera = config.get( "race/camera/" .. map, false )
 
     local function replaceSpawn()
         ash_player.cleanSpawnPoints()
 
         timer.Simple( 0, function()
             if spawns then
-                for _, v in ipairs( ash_entity.getByClass( "info_player_start", false ) ) do
+                for _, v in ipairs( ash_entity.findByClass( "info_player_start" ) ) do
                     v:Remove()
                 end
 
@@ -134,11 +59,11 @@ do
                     local data = spawns[ i ]
 
                     local ent = ents.Create( "info_player_start" )
-                    ent:SetPos( data[ 1 ] )
-                    ent:SetAngles( data[ 2 ] )
+                    ent:SetPos( Vector( data[ 1 ] ) )
+                    ent:SetAngles( Angle( data[ 2 ] ) )
                     ent:Spawn()
 
-                    ash_player.addSpawnPoint( ent, data[ 1 ], data[ 2 ] )
+                    ash_player.addSpawnPoint( ent, Vector( data[ 1 ] ), Angle( data[ 2 ] ) )
                     ash.Logger:debug( "info_player_start replaced for new %s", ent )
                 end
             end
@@ -149,12 +74,14 @@ do
 
                     local ent = ents.Create( "race_trigger_finish" )
                     ---@cast ent race.trigger_finish
-                    ent:SetPos( data[ 1 ] )
-                    ent.Mins = ent:WorldToLocal( data[ 1 ] )
-                    ent.Maxs = ent:WorldToLocal( data[ 2 ] )
+                    ent:SetPos( Vector( data[ 1 ] ) )
+                    ent:SetAngles( Angle( data[ 3 ] ) )
+                    ent.Mins = ent:WorldToLocal( Vector( data[ 1 ] ) )
+                    ent.Maxs = ent:WorldToLocal( Vector( data[ 2 ] ) )
+
                     ent:Spawn()
-                    ent.Dir = data[ 3 ]
-                    ent.DirReverse = data[ 3 ] * -1
+                    ent.Dir = Vector( data[ 4 ] )
+                    ent.DirReverse = Vector( data[ 4 ] ) * -1
 
                     ash.Logger:debug( "race_trigger_finish spawned %s", ent )
                 end
@@ -166,9 +93,9 @@ do
 
                     local ent = ents.Create( "race_trigger_kill" )
                     ---@cast ent race.trigger_kill
-                    ent:SetPos( data[ 1 ] )
-                    ent.Mins = ent:WorldToLocal( data[ 1 ] )
-                    ent.Maxs = ent:WorldToLocal( data[ 2 ] )
+                    ent:SetPos( Vector( data[ 1 ] ) )
+                    ent.Mins = ent:WorldToLocal( Vector( data[ 1 ] ) )
+                    ent.Maxs = ent:WorldToLocal( Vector( data[ 2 ] ) )
                     ent:Spawn()
 
                     ash.Logger:debug( "race_trigger_kill spawned %s", ent )
@@ -186,20 +113,18 @@ do
                 ent:SetPos( v[ 1 ] )
                 ent.Mins = ent:WorldToLocal( v[ 1 ] )
                 ent.Maxs = ent:WorldToLocal( v[ 2 ] )
-                -- ent:SetAngles( v[ 5 ] )
+                ent:SetAngles( v[ 3 ] )
                 ent:Spawn()
-
-                ash.Logger:debug( "mins = %s, maxs = %s", v[ 1 ], v[ 2 ] )
 
                 ent.checkpointID = i
 
-                if i == list_checkpoints_count then
-                    ent.checkpointIDNext = 1
-                else
-                    ent.checkpointIDNext = i + 1
-                end
+                ent.checkpointIDNext = i + 1
 
-                printf( "checkpoint %s", ent )
+                ent.Dir = v[ 4 ]
+                ent.DirReverse = v[ 4 ] * -1
+
+
+                ash.Logger:debug( "checkpoint %s dir = %s", ent, ent.Dir )
             end
 
             if spawn_ash_camera then
@@ -208,15 +133,15 @@ do
 
                     local ent = ents.Create( "ash_camera" )
                     ---@cast ent ash.camera
-                    ent:SetPos( data[ 1 ] )
-                    ent:SetAngles( data[ 2 ] )
+                    ent:SetPos( Vector( data[ 1 ] ) )
+                    ent:SetAngles( Angle( data[ 2 ] ) )
                     ent:Spawn()
 
                     if i == 1 then
                         SetGlobal2Entity( "race.cam", ent )
                     end
 
-                    printf( "ash camera %s", ent )
+                    ash.Logger:debug( "ash camera %s", ent )
                 end
             end
 
@@ -275,33 +200,56 @@ hook.Add( "CanPlayerEnterVehicle", "Defaults", function( pl )
 end )
 
 hook.Add( "CanExitVehicle", "Defaults", function( _, pl )
-    return true
+    if developer:GetBool() and pl:IsSuperAdmin() then
+        return true
+    end
 end )
 
 hook.Add( "race.PlayerSpawn", "Defaults", function( pl )
     pl:SetNW2Float( "race.startTime", CurTime() )
-
+    pl:SetNW2Int( "race.checkpointID", 1 )
     pl:SetNW2Int( "race.points", 0 )
 end )
 
 hook.Add( "race.PlayerChangeVehicle", "Dir", function( pl, new_car )
     if round.getRoundType() == "prepare" then
         vehicle.remove( pl )
-        pl:KillSilent()
-        timer.Simple( 1, function()
+        timer.Simple( 0.3, function()
             if IsValid( pl ) and round.getRoundType() == "prepare" then
-                if not pl:Alive() then
-                    pl:Spawn()
-                end
-
-                vehicle.create( pl, new_car )
+                pl:KillSilent()
+                pl:Spawn()
             end
         end )
     end
 end )
 
+hook.Add( "CanPlayerSuicide", "Defaults", function( pl )
+    vehicle.remove( pl )
+    pl:KillSilent()
+    timer.Simple( 0.3, function()
+        if IsValid( pl ) then
+            pl:Spawn()
+        end
+    end )
+    return false
+end )
+
 hook.Add( "Glide_CanPlayerVehicleInput", "Defaults", function( pl )
     if round.getRoundType() == "prepare" then
         return false
+    end
+end )
+
+concommand.Add( "race_tospawn", function( pl, _, args )
+    if not pl:IsSuperAdmin() then
+        return
+    end
+
+    local ent = ash_entity.findByClass( "info_player_start" )[ 1 ]
+    if ent then
+        local car = pl:GlideGetVehicle()
+        if IsValid( car ) then
+            car:SetPos( ent:GetPos() )
+        end
     end
 end )

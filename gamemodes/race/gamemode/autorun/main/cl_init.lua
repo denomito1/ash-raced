@@ -96,7 +96,7 @@ concommand.Add( "race_spawnpos", function( pl )
     local pos = pl:GetPos()
     local pos_end = pos + pl:GetAimVector() * 100
 
-    print( string.format( "\t{\n\t\tVector( %s, %s, %s ),\n\t\tVector( %s, %s, %s )\n\t},", pos.x, pos.y, pos.z, pos_end.x, pos_end.y, pos_end.z ) )
+    print( string.format( "\t{\n\t\t[%s %s %s],\n\t\t[%s %s %s]\n\t},", math.round( pos.x ), math.round( pos.y ), math.round( pos.z ), math.round( pos_end.x ), math.round( pos_end.y ), math.round( pos_end.z ) ) )
 end )
 
 
@@ -121,7 +121,7 @@ concommand.Add( "race_path", function()
     for i = 1, list_points_path_count - 1 do
         local pos = list_points_path[ i ]
 
-        print( string.format( "\tVector( %s, %s, %s ),", math.floor( pos.x ), math.floor( pos.y ), math.floor( pos.z ) ) )
+        print( string.format( "[%s %s %s],", math.floor( pos.x ), math.floor( pos.y ), math.floor( pos.z ) ) )
     end
 end )
 
@@ -136,14 +136,14 @@ end )
 concommand.Add( "race_dir", function( pl )
     local pos = pl:GetAimVector()
 
-    print( string.format( "Vector( %s, %s, %s ),", math.round( pos.x ), math.round( pos.y ), math.round( pos.z ) ) )
+    print( string.format( "[%s %s %s],", math.round( pos.x ), math.round( pos.y ), math.round( pos.z ) ) )
 end )
 
 concommand.Add( "race_getpos", function( pl )
     local pos = pl:GetPos()
     local ang = pl:GetRenderAngles()
 
-    print( string.format( "{ Vector( %s, %s, %s ), Angle( %s, %s, %s ) }", math.round( pos.x ), math.round( pos.y ), math.round( pos.z ), math.round( ang.p ), math.round( ang.y ), math.round( ang.r ) ) )
+    print( string.format( "[ \"%s %s %s\", \"%s %s %s\" ],", math.round( pos.x ), math.round( pos.y ), math.round( pos.z ), math.round( ang.p ), math.round( ang.y ), math.round( ang.r ) ) )
 end )
 
 local box_mins, box_maxs

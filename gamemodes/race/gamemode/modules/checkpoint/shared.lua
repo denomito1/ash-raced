@@ -35,8 +35,9 @@ if SERVER then
         local mins = Vector( v[ 1 ] )
         local maxs = Vector( v[ 2 ] )
         local ang = Angle( v[ 3 ] )
+        local dir = Vector( v[ 4 ] )
 
-        checkpoints[ i ] = { mins, maxs, (mins + maxs) * 0.5, (maxs - mins) * 0.5, ang }
+        checkpoints[ i ] = { mins, maxs, ang, dir, (mins + maxs) * 0.5, (maxs - mins) * 0.5 }
     end
 
 else
@@ -56,10 +57,9 @@ else
             local mins = Vector( v[ 1 ] )
             local maxs = Vector( v[ 2 ] )
             local ang = Angle( v[ 3 ] )
+            local dir = Vector( v[ 4 ] )
 
-            checkpoints[ i ] = { mins, maxs, (mins + maxs) * 0.5, (maxs - mins) * 0.5, ang }
-
-            printf( "checkpoints count %s ", #checkpoints )
+            checkpoints[ i ] = { mins, maxs, ang, dir, (mins + maxs) * 0.5, (maxs - mins) * 0.5 }
         end
     end )
 end
