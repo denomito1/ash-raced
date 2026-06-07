@@ -13,7 +13,7 @@ local grid = import( "race.grid" )
 local ash_player = import( "ash.player" )
 
 ash_ui.font( "race.TimeLeft", {
-    font = "Roboto",
+    font = "SF Mono Regular",
     extended = true,
     size = "4vmin",
     weight = 900,
@@ -31,7 +31,7 @@ ash_ui.font( "race.TimeLeft", {
 } )
 
 ash_ui.font( "race.roundType", {
-    font = "Roboto",
+    font = "SF Mono Regular",
     extended = true,
     size = "2vmin",
     weight = 900,
@@ -49,7 +49,7 @@ ash_ui.font( "race.roundType", {
 } )
 
 ash_ui.font( "race.laps", {
-    font = "Roboto",
+    font = "SF Mono Regular",
     extended = true,
     size = "1.5vmin",
     weight = 900,
@@ -84,7 +84,7 @@ do
         add_y = add_y + h
         h = draw.SimpleText( round.getRoundType():upper(), "race.roundType", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
         add_y = add_y + h
-        h = draw.SimpleText( "Круги: " .. math.max( lp:GetNW2Int( "race.points", 0 ) - 1, 0 ) .. " / " .. race_laps:GetInt(), "race.laps", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
+        h = draw.SimpleText( "Lap: " .. math.max( lp:GetNW2Int( "race.points", 0 ) - 1, 0 ) .. " / " .. race_laps:GetInt(), "race.laps", ash_ui.ScreenCenterX, 5 + add_y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP )
         add_y = add_y + h
 
         draw.SimpleText( lp:GetNW2Int( "race.checkpointID", 1 ), "race.laps", 5, ash_ui.ScreenCenterY, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )

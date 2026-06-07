@@ -10,8 +10,6 @@ local checkpoint = import( "checkpoint" )
 
 local checkpoints_count = #checkpoint.getList()
 
-print( "checkpoints_count: " .. checkpoints_count )
-
 ---@param entity Vehicle
 function ENT:startTouch( entity )
     if IsValid( entity ) and entity.IsGlideVehicle then

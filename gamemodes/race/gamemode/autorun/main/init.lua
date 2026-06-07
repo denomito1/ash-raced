@@ -26,8 +26,36 @@ local config = import( "ash.config" )
 ---@type ash.entity
 import( "ash.entity" )
 
+---@type ash.spectator
+local ash_spectator = import( "ash.spectator" )
+
+---@type ash.player.team
+local ash_team = import( "ash.player.team" )
+
 local race_laps = GetConVar( "race_laps" )
 assert( race_laps ~= nil, "race_laps convar not found" )
+
+local team_map = {
+    [ "player" ] = "player",
+    [ "p" ] = "player",
+    -- [ "spec" ] = "spec",
+    -- [ "spectator" ] = "spec",
+}
+
+local OBS_MODE_IN_EYE = OBS_MODE_IN_EYE
+
+concommand.Add( "team", function( pl, _, args )
+    local t = team_map[ args[ 1 ] ]
+
+    if t and ash_team.getTeam( pl ) ~= t then
+        if not ash_player.isDead( pl ) then
+            pl:KillSilent()
+        end
+
+        ash_spectator.unSpecate( pl )
+        ash_team.setTeam( pl, t )
+    end
+end )
 
 
 do
@@ -153,14 +181,10 @@ do
 
 end
 
-hook.Add( "ash.entity.PlayerCreated", "Defaults", function( pl )
-    timer.Simple( 1, function()
-        if IsValid( pl ) then
-            if ash_player.getCount() >= 1 and round.getRoundType() == "" then
-                round.start( "prepare", GetConVar( "developer" ):GetBool() and 10 or 60 )
-            end
-        end
-    end )
+hook.Add( "ash.PlayerTeamChanged", "Defaults", function( pl )
+    if #ash_team.getMembers( "player" ) >= 1 and round.getRoundType() == "" then
+        round.start( "prepare", developer:GetBool() and 10 or 60 )
+    end
 end )
 
 do
@@ -214,8 +238,8 @@ end )
 hook.Add( "race.PlayerChangeVehicle", "Dir", function( pl, new_car )
     if round.getRoundType() == "prepare" then
         vehicle.remove( pl )
-        timer.Simple( 0.3, function()
-            if IsValid( pl ) and round.getRoundType() == "prepare" then
+        timer.Create( "race.respawn_car_" .. pl:EntIndex(), 0.3, 1, function()
+            if IsValid( pl ) then
                 pl:KillSilent()
                 pl:Spawn()
             end
@@ -226,7 +250,7 @@ end )
 hook.Add( "CanPlayerSuicide", "Defaults", function( pl )
     vehicle.remove( pl )
     pl:KillSilent()
-    timer.Simple( 0.3, function()
+    timer.Create( "race.respawn_car_" .. pl:EntIndex(), 0.3, 1, function()
         if IsValid( pl ) then
             pl:Spawn()
         end
@@ -252,4 +276,108 @@ concommand.Add( "race_tospawn", function( pl, _, args )
             car:SetPos( ent:GetPos() )
         end
     end
+end )
+
+hook.Add( "ash.player.Initialized", "Defaults", function( pl )
+    if not ash_player.isDead( pl ) then
+        pl:KillSilent()
+    end
+
+    vehicle.remove( pl )
+
+    ash_team.setTeam( pl, "spec" )
+
+    local cams, cams_count = ash_entity.findByClass( "ash_camera" )
+
+    if cams_count > 0 then
+        ash_spectator.specate( pl, cams[ 1 ], OBS_MODE_IN_EYE )
+    else
+        local spawns, spawns_count = ash_entity.findByClass( "info_player_start" )
+
+        if spawns_count > 0 then
+            ash_spectator.specate( pl, spawns[ 1 ], OBS_MODE_IN_EYE )
+        end
+    end
+end )
+
+do
+    local round_mask_can_spawn = round.roundMask( "prepare", "started" )
+
+    hook.Add( "ash.player.ShouldSpawn", "Defaults", function( pl )
+
+        if ash_team.getTeam( pl ) == "spec" then
+            return false
+        end
+
+        local status = round.getRoundType()
+
+        if status == "prepare" or status == "started" then
+            return true
+        end
+
+        return false
+    end )
+end
+
+do
+    local spectator_entity_list, spectator_entity_list_count = {}, 0
+
+    local classes_map = {
+        [ "info_player_start" ] = true,
+        [ "ash_camera" ] = true,
+        [ "player" ] = true,
+    }
+
+    local Entity_GetClass = Entity.GetClass
+    for _, v in ash_entity.iterator() do
+        if classes_map[ Entity_GetClass( v ) ] then
+            spectator_entity_list[ spectator_entity_list_count ] = v
+            spectator_entity_list_count = spectator_entity_list_count + 1
+        end
+    end
+
+    hook.Add( "ash.spectator.GetAllowedEntity", "Defaults", function( pl )
+        return spectator_entity_list
+    end )
+
+    hook.Add( "ash.entity.Created", "Defaults", function( ent )
+        if classes_map[ Entity_GetClass( ent ) ] then
+            spectator_entity_list[ spectator_entity_list_count ] = ent
+            spectator_entity_list_count = spectator_entity_list_count + 1
+        end
+    end )
+
+    hook.Add( "ash.entity.Removed", "Defaults", function( ent )
+        if classes_map[ Entity_GetClass( ent ) ] then
+            if table.removeByValue( spectator_entity_list, ent, spectator_entity_list_count ) then
+                spectator_entity_list_count = spectator_entity_list_count - 1
+            end
+        end
+    end )
+
+    hook.Add( "ash.spectator.IsAllowedEntity", "Defaults", function( pl, ent )
+        return classes_map[ Entity_GetClass( ent ) ] or false
+    end )
+end
+
+resource.AddWorkshop( "3740359187" )
+
+hook.Add( "race.CanCreateVehicle", "Default", function( pl )
+    return ash_team.getTeam( pl ) == "player"
+end )
+
+hook.Add( "PlayerCanHearPlayersVoice", "Defaults", function( listener, talker )
+    if ash_team.getTeam( talker ) == "spec" then
+        return false
+    end
+
+    if ash_team.getTeam( listener ) == "spec" then
+        return false
+    end
+
+    if ash_team.getTeam( listener ) == "player" and ash_team.getTeam( talker ) == "player" then
+        return false
+    end
+
+    return true
 end )

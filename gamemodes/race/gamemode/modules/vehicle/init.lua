@@ -55,8 +55,10 @@ end
 local cars = config.get( "race/cars", false )
 local random_veh_class = cars[ math.random( #cars ) ].class_name
 
-hook.Add( "ash.round.start", "Defaults", function()
-    random_veh_class = cars[ math.random( #cars ) ].class_name
+hook.Add( "ash.round.start", "Defaults", function( data )
+    if data.name == "prepare" then
+        random_veh_class = cars[ math.random( #cars ) ].class_name
+    end
 end )
 
 local race_randomcar = CreateConVar( "race_randomcar", "0", { FCVAR_ARCHIVE, FCVAR_NOTIFY }, "Randomly selects a vehicle class for each player", 0, 1 )
@@ -122,7 +124,7 @@ end
 
 ---@param pl Player
 hook.Add( "ash.player.PreSpawn", "race.player.Spawn", function( pl )
-    if pl:Alive() and not spectator.isSpectator( pl ) then
+    if pl:Alive() and not spectator.isSpectator( pl ) and hook.Run( "race.CanCreateVehicle", pl ) ~= false then
         vehicle.create( pl )
     end
 end )

@@ -1,3 +1,6 @@
+---@type ash.ui
+local ash_ui = import( "ash.ui" )
+
 local PANEL_HTML = [[
     <!doctype html>
     <html>
@@ -227,26 +230,140 @@ local PANEL_HTML = [[
     </html>
 ]]
 
-concommand.Add("test_vgui", function()
-    local pnl = vgui.Create( "DHTML")
+---@type ash.player.team
+local ash_team = import( "ash.player.team" )
 
-    pnl:Dock( FILL )
+local menu = {}
 
-    pnl:SetHTML( PANEL_HTML )
 
-    pnl:AddFunction( "lua", "Play", function()
-        print("play")
-    end)
+---@class race.menu.black : Panel
+local black = ash_ui.setPanel( "black", "Panel" )
+black:SetAlpha( 0 )
+black:Dock( FILL )
+black:SetMouseInputEnabled( false )
+black:SetPaintedManually( true )
+black.Paint = function( self, w, h )
+    surface.SetDrawColor( 0, 0, 0, 255 )
+    surface.DrawRect( 0, 0, w, h )
+end
 
-    pnl:AddFunction( "lua", "Garage", function()
-        print("garage")
-    end)
 
-    pnl:AddFunction( "lua", "Settings", function()
-        print("settings")
-    end)
+function menu.screenDimming( time, from, to, callback )
+    black:SetAlpha( from )
+    black:AlphaTo( to, time, 0, callback )
+end
 
-    pnl:AddFunction( "lua", "Disconnect", function()
-        print("disconnect")
-    end)
-end)
+function menu.playMusic( path )
+    sound.PlayFile( "sound/" .. path, "noplay", function( station, errCode, errStr )
+        if IsValid( _G.RACE_MUSIC ) then
+            _G.RACE_MUSIC:Stop()
+        end
+
+        if IsValid( station ) then
+            station:Play()
+            station:EnableLooping( true )
+
+            _G.RACE_MUSIC = station
+        end
+    end )
+end
+
+function menu.stopMusic()
+    if IsValid( _G.RACE_MUSIC ) then
+        _G.RACE_MUSIC:Stop()
+    end
+end
+
+local music_from
+local music_to
+local music_time
+local music_start
+function menu.fadeMusic( from, to, time )
+    music_from = from
+    music_to = to
+    music_time = time
+    music_start = CurTime()
+end
+
+function menu.create()
+    local lp = LocalPlayer()
+    local panel = ash_ui.setPanel( "race.menu", "DHTML" )
+    panel:MakePopup()
+
+    ---@cast panel DHTML
+
+    panel:Dock( FILL )
+
+    panel:SetHTML( PANEL_HTML )
+
+    panel:AddFunction( "lua", "Play", function()
+        if IsValid( panel ) then
+            menu.fadeMusic( 1, 0, 5 )
+            if ash_team.getTeam( lp ) ~= "player" then
+                RunConsoleCommand( "team", "player" )
+
+                menu.screenDimming( 1, 0, 255, function()
+                    panel:SetVisible( false )
+                    menu.screenDimming( 1, 255, 0 )
+                end )
+
+                panel:SetAlpha( 255 )
+                panel:AlphaTo( 0, 1, 0, function()
+                    if IsValid( panel ) then
+                        panel:SetVisible( false )
+                    end
+                end )
+            end
+        end
+    end )
+
+    panel:AddFunction( "lua", "Garage", function()
+        RunConsoleCommand( "race_menu" )
+    end )
+
+    panel:AddFunction( "lua", "Settings", function()
+        print( "settings" )
+    end )
+
+    panel:AddFunction( "lua", "Disconnect", function()
+        Derma_Query( "Disconnect from server?", "Confirmation:", "Yes",
+            function() RunConsoleCommand( "disconnect" ) end,
+            "No",
+            function() end )
+    end )
+
+    return panel
+end
+
+local panel
+
+hook.Add( "InitPostEntity", "Defaults", function()
+    black:SetAlpha( 255 )
+    panel = menu.create()
+    panel:SetVisible( true )
+    timer.Simple( 5, function()
+        menu.playMusic( "race/music/fail-safe.mp3" )
+        menu.screenDimming( 1, 255, 0 )
+    end )
+end )
+
+hook.Add( "PostRenderVGUI", "Dimming", function()
+    if IsValid( black ) then
+        black:PaintManual()
+    end
+end )
+
+hook.Add( "KeyRelease", "Defaults", function( key )
+    if key == KEY_F1 and IsFirstTimePredicted() and IsValid( panel ) then
+        panel:SetVisible( not panel:IsVisible() )
+    end
+end )
+
+hook.Add( "Think", "Defaults", function()
+    local station = _G.RACE_MUSIC
+
+    if IsValid( station ) and music_from and music_to and music_start then
+        local number = Lerp( (CurTime() - music_start) / music_time, music_from, music_to )
+        station:SetVolume( number )
+    end
+end )
