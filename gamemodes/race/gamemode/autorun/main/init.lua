@@ -360,24 +360,16 @@ do
     end )
 end
 
-resource.AddWorkshop( "3740359187" )
-
 hook.Add( "race.CanCreateVehicle", "Default", function( pl )
     return ash_team.getTeam( pl ) == "player"
 end )
 
-hook.Add( "PlayerCanHearPlayersVoice", "Defaults", function( listener, talker )
+hook.Add( "PlayerCanHearPlayersVoice", "Defaults", function( _, talker )
     if ash_team.getTeam( talker ) == "spec" then
-        return false
-    end
-
-    if ash_team.getTeam( listener ) == "spec" then
-        return false
-    end
-
-    if ash_team.getTeam( listener ) == "player" and ash_team.getTeam( talker ) == "player" then
         return false
     end
 
     return true
 end )
+
+resource.AddWorkshop( "3740359187" )
