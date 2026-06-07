@@ -355,7 +355,12 @@ end )
 
 hook.Add( "KeyRelease", "Defaults", function( key )
     if key == KEY_F1 and IsFirstTimePredicted() and IsValid( panel ) then
-        panel:SetVisible( not panel:IsVisible() )
+        local vis = not panel:IsVisible()
+        panel:SetVisible( vis )
+
+        if vis then
+            panel:MakePopup()
+        end
     end
 end )
 
