@@ -358,6 +358,7 @@ hook.Add( "PlayerButtonUp", "Defaults", function( _, key )
     if key == KEY_F1 and IsFirstTimePredicted() and IsValid( panel ) then
         local vis = not panel:IsVisible()
         panel:SetVisible( vis )
+        panel:SetAlpha( 255 )
 
         if vis then
             panel:MakePopup()
