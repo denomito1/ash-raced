@@ -353,7 +353,7 @@ hook.Add( "PostRenderVGUI", "Dimming", function()
     end
 end )
 
-hook.Add( "PlayerButtonUp", "Defaults", function( key )
+hook.Add( "PlayerButtonUp", "Defaults", function( _, key )
     panel = ash_ui.getPanel( "race.menu" )
     if key == KEY_F1 and IsFirstTimePredicted() and IsValid( panel ) then
         local vis = not panel:IsVisible()
