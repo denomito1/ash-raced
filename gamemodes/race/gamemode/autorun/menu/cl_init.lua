@@ -313,6 +313,8 @@ function menu.create()
                         panel:SetVisible( false )
                     end
                 end )
+            else
+                panel:SetVisible( false )
             end
         end
     end )
