@@ -215,7 +215,7 @@ local PANEL_HTML = [[
                 }
             };
 
-            let lang = "ru";
+            let lang = "en";
 
             function updateLanguage() {
                 document.querySelectorAll("[data-lang]").forEach(element => {
@@ -333,6 +333,10 @@ function menu.create()
             "No",
             function() end )
     end )
+
+    --temporary solutionн
+    local lang = GetConVar( "gmod_language" ):GetString()
+    panel:RunJavascript( "lang = " .. lang == "ru" and "ru" or "en" .. ";" .. "updateLanguage();" )
 
     return panel
 end
